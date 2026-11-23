@@ -8,6 +8,8 @@ import { type Request, type Response } from 'express'
 import { challenges } from '../data/datacache'
 import * as security from '../lib/insecurity'
 
+const userFieldsWhitelist = ["id", "email", "lastLoginIp", "profileImage"];
+
 export function retrieveLoggedInUser () {
   return (req: Request, res: Response) => {
     let user
@@ -20,7 +22,10 @@ export function retrieveLoggedInUser () {
         // Parse the fields parameter into an array, splitting by comma.
         // If not provided, both these variables will be undefined.
         const fieldsParam = req.query?.fields as string | undefined
-        const requestedFields = fieldsParam ? fieldsParam.split(',').map(f => f.trim()) : []
+        let requestedFields = fieldsParam ? fieldsParam.split(',').map(f => f.trim()) : []
+
+        // Filter out any non whitelisted keys
+        requestedFields = requestedFields.filter(x => userFieldsWhitelist.includes(x))
 
         let baseUser: any = {}
 
